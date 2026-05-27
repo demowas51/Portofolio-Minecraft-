@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Craft My World | Portfolio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --mc-green: #55FF55;
+            --mc-blue: #55FFFF;
+            --mc-purple: #FF55FF;
+            --mc-gold: #FFFF55;
+            --neon-shadow: 0 0 10px rgba(85, 255, 85, 0.7), 0 0 20px rgba(85, 255, 85, 0.5);
+        }
+
+        body {
+            background-color: #0d0e15;
+            color: #ffffff;
+            font-family: 'VT323', monospace;
+            overflow-x: hidden;
+            /* Menggunakan background bertema coding neon gelap dari Unsplash */
+            background-image: 
+                linear-gradient(rgba(13, 14, 21, 0.65), rgba(13, 14, 21, 0.85)),
+                url('https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1920&auto=format&fit=crop');
+            background-attachment: fixed;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .pixel-font { font-family: 'Press Start 2P', cursive; }
+        
+        .mc-border {
+            border: 4px solid #333;
+            border-top-color: #555;
+            border-left-color: #555;
+            background: rgba(20, 21, 30, 0.85);
+            position: relative;
+            backdrop-filter: blur(4px);
+        }
+
+        .mc-button {
+            image-rendering: pixelated;
+            background: #3a3b45;
+            border: 4px solid #000;
+            border-top-color: #7b7b8b;
+            border-left-color: #7b7b8b;
+            transition: all 0.2s;
+            cursor: pointer;
+            display: inline-block;
+            padding: 10px 20px;
+        }
+
+        .mc-button:hover {
+            background: #55FF55;
+            color: #000;
+            box-shadow: var(--neon-shadow);
+            transform: scale(1.05);
+        }
+
+        .neon-text-green { color: var(--mc-green); text-shadow: 0 0 10px var(--mc-green); }
+        .neon-text-blue { color: var(--mc-blue); text-shadow: 0 0 10px var(--mc-blue); }
+        .neon-text-purple { color: var(--mc-purple); text-shadow: 0 0 10px var(--mc-purple); }
+        .neon-text-gold { color: var(--mc-gold); text-shadow: 0 0 10px var(--mc-gold); }
+
+        .section-card {
+            background: rgba(25, 26, 38, 0.8);
+            border: 4px solid #444;
+            transition: border-color 0.3s, transform 0.3s;
+            backdrop-filter: blur(6px);
+        }
+
+        .section-card:hover {
+            border-color: var(--mc-blue);
+        }
+
+        /* Skill Node diubah jadi tombol interaktif ala slot inventory */
+        .skill-node {
+            padding: 10px 20px;
+            background: #181924;
+            border: 4px solid #3c3d4c;
+            border-bottom-color: #101015;
+            border-right-color: #101015;
+            display: inline-block;
+            margin: 8px;
+            font-size: 1.6rem;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            user-select: none;
+        }
+
+        .skill-node:hover {
+            border-color: var(--mc-gold);
+            background: #2c2d3c;
+            transform: scale(1.05);
+            box-shadow: 0 0 8px rgba(255, 255, 85, 0.5);
+        }
+
+        .skill-node:active {
+            border-color: #101015;
+            border-bottom-color: #3c3d4c;
+            border-right-color: #3c3d4c;
+            transform: scale(0.95);
+        }
+
+        /* Minecraft Tooltip Pop-up */
+        .mc-tooltip {
+            background-color: rgba(16, 0, 16, 0.93);
+            border: 4px solid #2d0a63;
+            border-image: linear-gradient(to bottom, #2d0a63, #180332) 1;
+            box-shadow: 0 0 15px rgba(0,0,0,0.8);
+            display: none;
+            position: fixed;
+            z-index: 100;
+            padding: 12px 16px;
+            max-width: 320px;
+            pointer-events: none;
+        }
+
+        nav {
+            background: rgba(13, 14, 21, 0.8);
+            border-bottom: 4px solid #55FF55;
+            box-shadow: 0 4px 15px rgba(85, 255, 85, 0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
+
+        .floating { animation: pulse 3s infinite ease-in-out; }
+
+        /* Modal Box Custom ala Minecraft */
+        .mc-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            z-index: 200;
+            transition: transform 0.2s ease, opacity 0.2s ease;
+            opacity: 0;
+        }
+
+        .mc-modal.active {
+            display: block;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .mc-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 150;
+            backdrop-filter: blur(3px);
+        }
+
+        .mc-overlay.active {
+            display: block;
+        }
+
+        ::-webkit-scrollbar { width: 12px; }
+        ::-webkit-scrollbar-track { background: #0d0e15; }
+        ::-webkit-scrollbar-thumb {
+            background: #444;
+            border: 3px solid #0d0e15;
+        }
+        ::-webkit-scrollbar-thumb:hover { background: var(--mc-green); }
+    </style>
+</head>
+<body>
+
+    <!-- Overlay & Modal Stats Item -->
+    <div id="overlay" class="mc-overlay" onclick="closeItemModal()"></div>
+    <div id="statsModal" class="mc-modal mc-border max-w-sm w-full p-6 text-left">
+        <div class="flex justify-between items-start mb-4">
+            <h4 id="modalTitle" class="pixel-font text-sm neon-text-gold">Item Name</h4>
+            <button onclick="closeItemModal()" class="pixel-font text-xs text-red-500 hover:text-red-400 cursor-pointer">[X]</button>
+        </div>
+        <div class="space-y-3 text-xl border-t-2 border-gray-700 pt-3">
+            <p id="modalLevel" class="text-green-400">Level: V</p>
+            <p id="modalDurability" class="text-blue-300">Durability: 100/100</p>
+            <p id="modalDesc" class="text-gray-300 leading-relaxed">Lore / Deskripsi item di sini.</p>
+        </div>
+        <div class="mt-6 text-center">
+            <button onclick="closeItemModal()" class="mc-button pixel-font text-[10px]">CLOSE</button>
+        </div>
+    </div>
+
+    <!-- Hover Tooltip -->
+    <div id="tooltip" class="mc-tooltip">
+        <p id="tipName" class="pixel-font text-xs mb-1 text-yellow-300">Item</p>
+        <p id="tipType" class="text-purple-400 text-lg mb-1">Epic Gear</p>
+        <p id="tipDesc" class="text-gray-300 text-lg">Click to view stats!</p>
+    </div>
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 px-6 py-4 flex justify-between items-center">
+        <div class="pixel-font text-xs md:text-sm neon-text-green">MY_WORLD.EXE</div>
+        <div class="hidden md:flex space-x-8 text-xl">
+            <a href="#hero" class="hover:text-green-400">Home</a>
+            <a href="#skills" class="hover:text-blue-400">Skills</a>
+            <a href="#work" class="hover:text-purple-400">Experience</a>
+            <a href="#blog" class="hover:text-yellow-400">Blog</a>
+        </div>
+    </nav>
+
+    <!-- Section 1: Hero -->
+    <section id="hero" class="min-h-screen flex flex-col justify-center items-center text-center px-6 pt-20">
+        <div class="mc-border p-8 md:p-12 max-w-4xl floating">
+            <h1 class="pixel-font mb-6">
+                <span class="text-[10px] md:text-sm opacity-80 block mb-2 uppercase tracking-widest">Selamat Datang Di Website</span>
+                <span class="text-xl md:text-3xl neon-text-green block">Al morrist rafif Purwoko</span>
+            </h1>
+            <p class="text-2xl md:text-3xl mb-8 leading-relaxed">
+                Selamat datang di world buatan gue. Di sini gue nge-build karir dan karya kayak lagi nyusun block Diamond. 
+                Tujuan website ini simpel: biar lo tau kalo gue itu <span class="neon-text-blue">Tech Explorer</span> yang siap party di project lo!
+            </p>
+            <button class="mc-button pixel-font text-xs" onclick="window.location.href='#skills'">
+                IKUTI GUE SEKARANG
+            </button>
+        </div>
+    </section>
+
+    <!-- Section 2: Skills -->
+    <section id="skills" class="py-24 px-6 max-w-6xl mx-auto">
+        <h2 class="pixel-font text-2xl mb-4 text-center neon-text-blue">Inventory Skills</h2>
+        <p class="text-center text-gray-400 text-2xl mb-12">Klik setiap item/skill buat buka lore stats rahasianya!</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="section-card p-6 text-center">
+                <h3 class="pixel-font text-lg mb-6 neon-text-gold">Coding Tools</h3>
+                <div class="flex flex-wrap justify-center">
+                    <span class="skill-node" 
+                          data-name="HTML" 
+                          data-level="Level: X (God Tier)" 
+                          data-durability="Durability: Infinite"
+                          data-desc="Material pondasi utama buat ngebangun struktur web kokoh biar gak gampang roboh dihantam badai server."
+                          data-type="Structural Block">HTML</span>
+                    <span class="skill-node" 
+                          data-name="PYTHON" 
+                          data-level="Level: VIII (Enchanted)" 
+                          data-durability="Durability: 2500 / 2500"
+                          data-desc="Script ajaib buat bikin automation, scraping data, logic machine learning, sampai script backend secepat kilat."
+                          data-type="Enchanted Book">PYTHON</span>
+                </div>
+            </div>
+            <div class="section-card p-6 text-center">
+                <h3 class="pixel-font text-lg mb-6 neon-text-purple">Networking Gear</h3>
+                <div class="flex flex-wrap justify-center">
+                    <span class="skill-node" 
+                          data-name="CISCO" 
+                          data-level="Level: IX (Pro Linker)" 
+                          data-durability="Durability: 3000 / 3000"
+                          data-desc="Ahli mengkonfigurasi rute jaringan rumit. Switch dan Router tunduk di bawah perintah terminal script lo."
+                          data-type="Redstone Repeater">CISCO</span>
+                    <span class="skill-node" 
+                          data-name="MIKROTIK" 
+                          data-level="Level: IX (Gatekeeper)" 
+                          data-durability="Durability: 2800 / 2800"
+                          data-desc="Pakar setup firewall, bandwith limiter, hotspot gate, dan tunneling VPN aman buat jagain portal world dari maling."
+                          data-type="Network Anchor">MIKROTIK</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 3: Work Experience -->
+    <section id="work" class="py-24 px-6">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="pixel-font text-2xl mb-12 text-center neon-text-purple">Quest Log (Pengalaman)</h2>
+            <div class="mc-border p-8">
+                <div class="space-y-8">
+                    <!-- Job 1 -->
+                    <div class="relative pl-8 border-l-4 border-purple-500">
+                        <div class="absolute -left-3 top-0 w-5 h-5 bg-purple-500 shadow-[0_0_10px_#FF55FF]"></div>
+                        <h3 class="pixel-font text-lg neon-text-purple">Senior Dev @ Pixel Studio</h3>
+                        <p class="text-gray-400 text-xl">2022 - Sekarang</p>
+                        <p class="text-2xl mt-2 italic">Nge-lead tim buat bikin aplikasi yang gak cuma kenceng tapi juga 'eye-candy' buat user.</p>
+                    </div>
+                    <!-- Job 2 -->
+                    <div class="relative pl-8 border-l-4 border-blue-500">
+                        <div class="absolute -left-3 top-0 w-5 h-5 bg-blue-500 shadow-[0_0_10px_#55FFFF]"></div>
+                        <h3 class="pixel-font text-lg neon-text-blue">Freelance Web Builder</h3>
+                        <p class="text-gray-400 text-xl">2020 - 2022</p>
+                        <p class="text-2xl mt-2">Bantu startup lokal buat level up bisnis mereka lewat website yang responsif parah.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section 4: Blog -->
+    <section id="blog" class="py-24 px-6 max-w-6xl mx-auto">
+        <h2 class="pixel-font text-2xl mb-12 text-center neon-text-gold">Daily Logs (Blog)</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Blog Item 1 -->
+            <div class="section-card overflow-hidden">
+                <div class="h-48 bg-gray-700 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1587573089734-09cb69c0f2b4?q=80&w=500&auto=format&fit=crop" alt="[Gambar Redstone]" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="p-4">
+                    <h4 class="pixel-font text-sm mb-2 neon-text-green">Belajar Redstone Logic</h4>
+                    <p class="text-xl mb-4">Gimana logika Minecraft ngebantu gue paham backend development.</p>
+                    <a href="#" class="text-green-400 hover:underline">Read more -></a>
+                </div>
+            </div>
+            <!-- Blog Item 2 -->
+            <div class="section-card overflow-hidden">
+                <div class="h-48 bg-gray-700 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=500&auto=format&fit=crop" alt="[Gambar Setup]" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="p-4">
+                    <h4 class="pixel-font text-sm mb-2 neon-text-blue">Setup Room Gaming 2024</h4>
+                    <p class="text-xl mb-4">Review setup minimalis tapi tetep neon biar nambah FPS pas coding.</p>
+                    <a href="#" class="text-blue-400 hover:underline">Read more -></a>
+                </div>
+            </div>
+            <!-- Blog Item 3 -->
+            <div class="section-card overflow-hidden">
+                <div class="h-48 bg-gray-700 overflow-hidden">
+                    <img src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=500&auto=format&fit=crop" alt="[Gambar Coding]" class="w-full h-full object-cover opacity-60 hover:opacity-100 transition-opacity">
+                </div>
+                <div class="p-4">
+                    <h4 class="pixel-font text-sm mb-2 neon-text-purple">Makan Siang Dev</h4>
+                    <p class="text-xl mb-4">Gak cuma ngoding, gue juga hobi nyari kulineran hidden gem.</p>
+                    <a href="#" class="text-purple-400 hover:underline">Read more -></a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t-4 border-gray-800 text-center bg-black bg-opacity-80">
+        <p class="pixel-font text-[10px] text-gray-500">
+            MADE WITH ❤️ BY AL MORRIST | © 2026 PLAYER_ONE.EXE
+        </p>
+    </footer>
+
+    <script>
+        // Setup Web Audio API untuk efek suara Minecraft Click sintetis (biar gak butuh file eksternal)
+        const playClickSound = () => {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.type = 'triangle';
+                // Frekuensi klik kayu minecraft khas
+                osc.frequency.setValueAtTime(120, ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 0.15);
+                
+                gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                
+                osc.start();
+                osc.stop(ctx.currentTime + 0.15);
+            } catch (error) {
+                console.log("Audio not supported or interaction required first.");
+            }
+        };
+
+        // Hover Tooltip logic
+        const tooltip = document.getElementById('tooltip');
+        const tipName = document.getElementById('tipName');
+        const tipType = document.getElementById('tipType');
+        const tipDesc = document.getElementById('tipDesc');
+
+        const skillNodes = document.querySelectorAll('.skill-node');
+
+        skillNodes.forEach(node => {
+            // Hover states
+            node.addEventListener('mousemove', (e) => {
+                const name = node.getAttribute('data-name');
+                const type = node.getAttribute('data-type');
+                
+                tipName.innerText = name;
+                tipType.innerText = type;
+                
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.clientX + 15) + 'px';
+                tooltip.style.top = (e.clientY + 15) + 'px';
+            });
+
+            node.addEventListener('mouseleave', () => {
+                tooltip.style.display = 'none';
+            });
+
+            // Click states (SFX + Modal Pop up)
+            node.addEventListener('click', () => {
+                playClickSound();
+                
+                const name = node.getAttribute('data-name');
+                const level = node.getAttribute('data-level');
+                const durability = node.getAttribute('data-durability');
+                const desc = node.getAttribute('data-desc');
+
+                document.getElementById('modalTitle').innerText = name;
+                document.getElementById('modalLevel').innerText = level;
+                document.getElementById('modalDurability').innerText = durability;
+                document.getElementById('modalDesc').innerText = desc;
+
+                // Open modal
+                document.getElementById('overlay').classList.add('active');
+                document.getElementById('statsModal').classList.add('active');
+            });
+        });
+
+        const closeItemModal = () => {
+            playClickSound();
+            document.getElementById('overlay').classList.remove('active');
+            document.getElementById('statsModal').classList.remove('active');
+        };
+
+        // Smooth scroll buat navigasi
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
